@@ -57,9 +57,7 @@ export default {
 
       const worksheet = this.workbook.Sheets[sheetName];
       let csv = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-      this.columns = csv[0];
-
-      csv.pop();
+      this.columns = csv.shift();
 
       this.loadData(csv);
     },
