@@ -1,13 +1,18 @@
 <template>
   <div id="app">
-    <excel-table></excel-table>
+    <excel-table v-if="false"></excel-table>
+
+    <HandsonExcelTable />
   </div>
 </template>
 
 <script>
 import { ExcelTable } from "@/excel-table";
+import { HandsonExcelTable } from "@/handson-table";
+
 export default {
   components: {
+    HandsonExcelTable,
     ExcelTable,
   },
 };
