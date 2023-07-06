@@ -2,6 +2,8 @@
   <div>
     <button @click="exportCsvFile">导出 csv</button>
 
+    <input id="searchField" type="search" placeholder="Search" />
+
     <div id="container" ref="containerRef"></div>
     <!-- <hot-table ref="hotTableRef" :settings="settings" :data="data"> </hot-table> -->
   </div>
@@ -26,6 +28,7 @@ import { zhCN, registerLanguageDictionary } from "handsontable/i18n";
 
 import { mockTableData } from "@/utils";
 
+// 注册语言模块
 registerLanguageDictionary(zhCN);
 
 // register Handsontable's modules
@@ -34,14 +37,29 @@ registerAllModules();
 export default {
   data() {
     return {
-      colNums: 20,
+      colNums: 200,
       settings: {},
       handsontableInstance: null,
-      data: mockTableData(this.colNums),
+      data: mockTableData(200),
     };
   },
   mounted() {
+    console.log("this.data", this.data);
     this.createHandsontableInstance();
+    document
+      .querySelector("#searchField")
+      .addEventListener("keyup", (event) => {
+        // get the `Search` plugin's instance
+        const search = this.handsontableInstance.getPlugin("search");
+
+        console.log("search", search);
+        // use the `Search` plugin's `query()` method
+        setTimeout(() => {
+          search.query(event.target.value, () => {});
+
+          this.handsontableInstance.render();
+        }, 1000);
+      });
   },
   methods: {
     // 创建表格实例
@@ -58,8 +76,8 @@ export default {
       this.handsontableInstance = hot;
     },
     exportCsvFile() {
-      const exportPlugin = this.hotTableInstance.getPlugin("exportFile");
-      exportPlugin.downloadFile("csv", {
+      const exportPlugin = this.handsontableInstance.getPlugin("exportFile");
+      exportPlugin.downloadFile("xlsx", {
         bom: false,
         columnDelimiter: ",",
         columnHeaders: false,
@@ -67,14 +85,25 @@ export default {
         exportHiddenRows: true,
         fileExtension: "csv",
         filename: "Handsontable-CSV-file_[YYYY]-[MM]-[DD]",
-        mimeType: "text/csv",
+        // mimeType: "text/csv",
+        mimeType:
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         rowDelimiter: "\r\n",
         rowHeaders: true,
       });
     },
     // 创建 settings 对象
     createHandesonTableSettings() {
+      // // define your custom query method
+      // function onlyExactMatch(queryStr, value) {
+      //   return queryStr.toString() === value.toString();
+      // }
       return {
+        // 开启过滤 过滤需要同时开启 dropdownMenu 属性
+        filters: true,
+        // 筛选下拉菜单
+        dropdownMenu: true,
+
         colHeaders: true,
         rowHeaders: true,
         dragToScroll: true,
@@ -91,8 +120,21 @@ export default {
         stretchH: "all",
         // 可自定宽度
         manualColumnResize: true,
+        // 可移动行位置
+        manualRowMove: true,
+        // 可移动列位置
+        manualColumnMove: true,
         // 是否启用菜单
         contextMenu: true,
+        // 开启搜索
+        // search: true,
+        // search: {
+        //   // add your custom CSS class
+        //   searchResultClass: "my-custom-search-result-class",
+        //   // add your custom query method
+        //   queryMethod: onlyExactMatch,
+        // },
+
         afterGetColHeader: this.afterGetColHeader,
         columns: this.createColumns(),
         language: zhCN.languageCode,
@@ -150,3 +192,9 @@ export default {
   },
 };
 </script>
+<style>
+.my-custom-search-result-class {
+  color: #ff0000;
+  font-weight: 900;
+}
+</style>

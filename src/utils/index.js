@@ -10,5 +10,7 @@ export function mockTableData(colNums = 20, rowNums = 10000) {
     data.push(temp);
   }
 
+  // data.push(['cover: 'https://handsontable.com/docs/img/examples/javascript-the-definitive-guide.jpg''])
+
   return data;
 }
