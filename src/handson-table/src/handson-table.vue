@@ -2,6 +2,7 @@
   <div>
     <div class="my-custom-search-result-class">123123</div>
     <button @click="exportCsvFile">导出 csv</button>
+    <button @click="exportXlsx">导出 xlsx</button>
 
     <input id="searchField" type="search" placeholder="Search" />
 
@@ -15,6 +16,7 @@ import CustomHeader from "./custom-header.vue";
 
 import { createHandsontable } from "./handson-table";
 import { mountComponent, mockTableData } from "./utils";
+import { csvToXlsx } from "./csv-to-xlsx";
 
 export default {
   data() {
@@ -46,8 +48,10 @@ export default {
       this.handsontableInstance = createHandsontable(container);
     },
     exportCsvFile() {
-      // this.handsontableInstance.exportFile();
-      this.handsontableInstance.exportAsBlob();
+      this.handsontableInstance.downloadCsvFile();
+    },
+    exportXlsx() {
+      csvToXlsx(this.handsontableInstance.exportCsvAsString());
     },
     // 创建列
     createColumns() {

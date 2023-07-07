@@ -27,3 +27,36 @@ export function mockTableData(colNums = 20, rowNums = 10) {
   }
   return data;
 }
+
+export function downloadFile(name, url) {
+  const a = document.createElement("a");
+
+  const rootDocument = window.document;
+
+  if (a.download !== void 0) {
+    a.style.display = "none";
+    a.setAttribute("href", url);
+    a.setAttribute("download", name);
+    rootDocument.body.appendChild(a);
+    a.dispatchEvent(new MouseEvent("click"));
+    rootDocument.body.removeChild(a);
+
+    // setTimeout(() => {
+    //   URL.revokeObjectURL(url);
+    // }, 100);
+  } else if (navigator.msSaveOrOpenBlob) {
+    // IE10+
+    // navigator.msSaveOrOpenBlob(blob, name);
+  }
+}
+
+export function createBlob(blob, options) {
+  const { encoding = "utf8" } = options || {};
+  if (typeof Blob !== "undefined") {
+    return new Blob([blob], {
+      type: `${options.mimeType};charset=${encoding}`,
+    });
+  }
+
+  return null;
+}

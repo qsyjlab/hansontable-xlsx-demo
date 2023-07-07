@@ -41,6 +41,9 @@ export const DEFAULT_SETTING = {
   manualRowMove: true,
   // 可移动列位置
   manualColumnMove: true,
+
+  // 开启合并单元格
+  mergeCells: true,
   // 是否启用菜单
   contextMenu: true,
   // 开启搜索
@@ -98,7 +101,7 @@ export function createHandsontable($el, settings = {}) {
    */
   function _baseExport(invokerName, setting = {}) {
     const exportPlugin = getPlugin(HANDESON_PLUGIN_NAME.EXPORT_FILE);
-    exportPlugin[invokerName](
+    return exportPlugin[invokerName](
       "csv",
       Object.assign(DEFUALT_DOWNLOAD_FILE_SETTING, setting)
     );
