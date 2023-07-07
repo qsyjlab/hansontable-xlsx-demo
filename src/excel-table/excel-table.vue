@@ -66,8 +66,15 @@ const computedWorker = new Worker(
   new URL("./computed.worker.js", import.meta.url)
 );
 
+import VXETable from "vxe-table";
+import "vxe-table/lib/style.css";
+
+// Vue.use(VXETable);
+
 export default {
   components: {
+    // eslint-disable-next-line vue/no-unused-components
+    VXETable,
     FindModal,
   },
   data() {
