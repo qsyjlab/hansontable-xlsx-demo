@@ -1,5 +1,6 @@
 <template>
   <div>
+    <div class="my-custom-search-result-class">123123</div>
     <button @click="exportCsvFile">导出 csv</button>
 
     <input id="searchField" type="search" placeholder="Search" />
@@ -37,28 +38,22 @@ registerAllModules();
 export default {
   data() {
     return {
-      colNums: 200,
+      colNums: 20,
       settings: {},
       handsontableInstance: null,
-      data: mockTableData(200),
+      data: mockTableData(20, 2000),
     };
   },
   mounted() {
-    console.log("this.data", this.data);
     this.createHandsontableInstance();
     document
       .querySelector("#searchField")
       .addEventListener("keyup", (event) => {
         // get the `Search` plugin's instance
         const search = this.handsontableInstance.getPlugin("search");
+        search.query(event.target.value);
 
-        console.log("search", search);
-        // use the `Search` plugin's `query()` method
-        setTimeout(() => {
-          search.query(event.target.value, () => {});
-
-          this.handsontableInstance.render();
-        }, 1000);
+        this.handsontableInstance.render();
       });
   },
   methods: {
@@ -77,7 +72,7 @@ export default {
     },
     exportCsvFile() {
       const exportPlugin = this.handsontableInstance.getPlugin("exportFile");
-      exportPlugin.downloadFile("xlsx", {
+      exportPlugin.downloadFile("csv", {
         bom: false,
         columnDelimiter: ",",
         columnHeaders: false,
@@ -85,9 +80,7 @@ export default {
         exportHiddenRows: true,
         fileExtension: "csv",
         filename: "Handsontable-CSV-file_[YYYY]-[MM]-[DD]",
-        // mimeType: "text/csv",
-        mimeType:
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        mimeType: "text/csv",
         rowDelimiter: "\r\n",
         rowHeaders: true,
       });
@@ -100,9 +93,9 @@ export default {
       // }
       return {
         // 开启过滤 过滤需要同时开启 dropdownMenu 属性
-        filters: true,
+        // filters: true,
         // 筛选下拉菜单
-        dropdownMenu: true,
+        // dropdownMenu: true,
 
         colHeaders: true,
         rowHeaders: true,
@@ -128,12 +121,12 @@ export default {
         contextMenu: true,
         // 开启搜索
         // search: true,
-        // search: {
-        //   // add your custom CSS class
-        //   searchResultClass: "my-custom-search-result-class",
-        //   // add your custom query method
-        //   queryMethod: onlyExactMatch,
-        // },
+        search: {
+          // add your custom CSS class
+          searchResultClass: "my-custom-search-result-class",
+          // add your custom query method
+          // queryMethod: onlyExactMatch,
+        },
 
         afterGetColHeader: this.afterGetColHeader,
         columns: this.createColumns(),
@@ -166,11 +159,6 @@ export default {
       //   console.log("columns", columns);
       const { $el } = this.createCustomHeader(CustomHeader, {
         props: { colIndex: col, column: columns[col] },
-        on: {
-          click: (props) => {
-            console.log("props", props);
-          },
-        },
       });
 
       target.appendChild($el);

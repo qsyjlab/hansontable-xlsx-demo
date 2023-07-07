@@ -1,4 +1,4 @@
-export function mockTableData(colNums = 20, rowNums = 10000) {
+export function mockTableData(colNums = 20, rowNums = 10) {
   const data = [];
 
   for (let rowIndex = 0; rowIndex < rowNums; rowIndex++) {
