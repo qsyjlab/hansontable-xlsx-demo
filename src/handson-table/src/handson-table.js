@@ -11,6 +11,8 @@ import {
   DEFUALT_DOWNLOAD_FILE_SETTING,
   EXPORT_METHOD_NAME,
 } from "./constant";
+import { csvToXlsx, mergedCellsToXlsxMergeConfig } from "./csv-to-xlsx";
+import { downloadFile } from "./utils";
 
 registerAllModules();
 registerLanguageDictionary(zhCN);
@@ -80,6 +82,12 @@ export function createHandsontable($el, settings = {}) {
     return instance.getPlugin(pluginName);
   }
 
+  function getAllMergedCells() {
+    const mergedCells = instance.getPlugin(HANDESON_PLUGIN_NAME.MERGE_CELLS)
+      .mergedCellsCollection.mergedCells;
+    return mergedCells;
+  }
+
   function search(value) {
     const search = getPlugin(HANDESON_PLUGIN_NAME.SEARCH);
     search.query(value);
@@ -119,15 +127,29 @@ export function createHandsontable($el, settings = {}) {
     return _baseExport(EXPORT_METHOD_NAME.TO_STRING, setting);
   }
 
+  function downloadXlsxFile() {
+    const csvData = instance.getData();
+    const mergedCells = getAllMergedCells();
+
+    const blob = csvToXlsx(csvData, (worksheet) => {
+      const mergedConfigs = mergedCellsToXlsxMergeConfig(mergedCells);
+      worksheet["!merges"] = mergedConfigs;
+    });
+
+    downloadFile("merged.xlsx", window.URL.createObjectURL(blob));
+  }
+
   return {
     instance,
     search,
     loadData,
     updateSettings,
     downloadCsvFile,
+    downloadXlsxFile,
     exportCsvAsBlob,
     exportCsvAsString,
     getPlugin,
+    getAllMergedCells,
     getSettings: () => instance.getSettings(),
   };
 }

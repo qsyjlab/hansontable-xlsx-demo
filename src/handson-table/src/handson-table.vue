@@ -4,6 +4,8 @@
     <button @click="exportCsvFile">导出 csv</button>
     <button @click="exportXlsx">导出 xlsx</button>
 
+    <button @click="getMergeCells">获取合并列</button>
+
     <input id="searchField" type="search" placeholder="Search" />
 
     <div ref="containerRef"></div>
@@ -16,7 +18,6 @@ import CustomHeader from "./custom-header.vue";
 
 import { createHandsontable } from "./handson-table";
 import { mountComponent, mockTableData } from "./utils";
-import { csvToXlsx } from "./csv-to-xlsx";
 
 export default {
   data() {
@@ -32,16 +33,19 @@ export default {
       .addEventListener("keyup", (event) => {
         this.handsontableInstance.search(event.target.value);
       });
-    setTimeout(() => {
-      const { updateSettings } = this.handsontableInstance;
-      this.handsontableInstance.loadData(mockTableData(this.colNums));
-      updateSettings({
-        afterGetColHeader: this.afterGetColHeader,
-        columns: this.createColumns(),
-      });
-    }, 2000);
+    const { updateSettings } = this.handsontableInstance;
+    this.handsontableInstance.loadData(mockTableData(this.colNums));
+    updateSettings({
+      afterGetColHeader: this.afterGetColHeader,
+      columns: this.createColumns(),
+    });
   },
   methods: {
+    getMergeCells() {
+      const cells = this.handsontableInstance.getAllMergedCells();
+
+      console.log("cells", cells);
+    },
     // 创建表格实例
     createHandsontableInstance() {
       const container = this.$refs.containerRef;
@@ -51,7 +55,7 @@ export default {
       this.handsontableInstance.downloadCsvFile();
     },
     exportXlsx() {
-      csvToXlsx(this.handsontableInstance.exportCsvAsString());
+      this.handsontableInstance.downloadXlsxFile();
     },
     // 创建列
     createColumns() {
@@ -67,7 +71,6 @@ export default {
     },
     // 动态渲染表头 （这里使用 vnode 生成真实节点）
     afterGetColHeader(col, th) {
-      console.log("args", arguments);
       if (col === -1) return th;
 
       const targetClass = ".colHeader";
