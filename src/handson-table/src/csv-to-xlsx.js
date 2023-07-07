@@ -22,12 +22,12 @@ export function csvToXlsx(csvData, callback) {
   return blob;
 }
 
+// handsontable mergedCells => xlsx mergeConfig
 export function mergedCellsToXlsxMergeConfig(mergedCells = []) {
   if (!mergedCells.length) return [];
   const xlsxMergeConfig = [];
 
   for (let i = 0; i < mergedCells.length; i++) {
-    console.log("mergedCells[i]", mergedCells[i]);
     const { row, col, rowspan, colspan } = mergedCells[i];
     const mergeObj = {
       s: { r: row, c: col },
@@ -37,4 +37,46 @@ export function mergedCellsToXlsxMergeConfig(mergedCells = []) {
   }
 
   return xlsxMergeConfig;
+}
+
+// xlsx mergeConfig => handsontable mergedCells
+export function xlsxMergeConfigTomergedCells(xlsxMergeConfig = []) {
+  if (!xlsxMergeConfig.length) return [];
+  const mergeConfig = [];
+
+  for (const xlsxMerge of xlsxMergeConfig) {
+    const { s, e } = xlsxMerge;
+    const startRow = s.r;
+    const startCol = s.c;
+    const endRow = e.r;
+    const endCol = e.c;
+    const rowspan = endRow - startRow + 1;
+    const colspan = endCol - startCol + 1;
+    const mergeObj = {
+      endRow: endRow - 1,
+      endCol,
+      row: startRow - 1,
+      col: startCol,
+      rowspan,
+      colspan,
+    };
+    mergeConfig.push(mergeObj);
+  }
+  return mergeConfig;
+}
+
+export function excelFilerReader(file, callback) {
+  let reader = new FileReader();
+  reader.onload = function (e) {
+    let data = e.target.result;
+    let workbook = XLSX.read(data, {
+      type: "binary",
+      raw: false,
+      cellDates: true,
+    });
+
+    // console.log('workbook',workbook);
+    if (callback) callback(workbook);
+  };
+  reader.readAsBinaryString(file);
 }

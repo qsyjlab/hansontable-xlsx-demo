@@ -82,12 +82,6 @@ export function createHandsontable($el, settings = {}) {
     return instance.getPlugin(pluginName);
   }
 
-  function getAllMergedCells() {
-    const mergedCells = instance.getPlugin(HANDESON_PLUGIN_NAME.MERGE_CELLS)
-      .mergedCellsCollection.mergedCells;
-    return mergedCells;
-  }
-
   function search(value) {
     const search = getPlugin(HANDESON_PLUGIN_NAME.SEARCH);
     search.query(value);
@@ -139,6 +133,24 @@ export function createHandsontable($el, settings = {}) {
     downloadFile("merged.xlsx", window.URL.createObjectURL(blob));
   }
 
+  function getAllMergedCells() {
+    const mergedCells = instance.getPlugin(HANDESON_PLUGIN_NAME.MERGE_CELLS)
+      .mergedCellsCollection.mergedCells;
+    return mergedCells;
+  }
+
+  function mergeCells(mergeConfig) {
+    // console.log(
+    //   instance.getPlugin(HANDESON_PLUGIN_NAME.MERGE_CELLS).mergeCells
+    // );
+    mergeConfig.forEach((config) => {
+      console.log("config", config);
+      instance
+        .getPlugin(HANDESON_PLUGIN_NAME.MERGE_CELLS)
+        .merge(config.row, config.col, config.endRow, config.endCol);
+    });
+  }
+
   return {
     instance,
     search,
@@ -150,6 +162,7 @@ export function createHandsontable($el, settings = {}) {
     exportCsvAsString,
     getPlugin,
     getAllMergedCells,
+    mergeCells,
     getSettings: () => instance.getSettings(),
   };
 }

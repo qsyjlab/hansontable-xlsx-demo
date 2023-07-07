@@ -7,6 +7,7 @@
     <button @click="getMergeCells">获取合并列</button>
 
     <input id="searchField" type="search" placeholder="Search" />
+    <input type="file" @change="fileChange" />
 
     <div ref="containerRef"></div>
     <!-- <hot-table ref="hotTableRef" :settings="settings" :data="data"> </hot-table> -->
@@ -18,6 +19,8 @@ import CustomHeader from "./custom-header.vue";
 
 import { createHandsontable } from "./handson-table";
 import { mountComponent, mockTableData } from "./utils";
+import { excelFilerReader, xlsxMergeConfigTomergedCells } from "./csv-to-xlsx";
+import * as XLSX from "xlsx";
 
 export default {
   data() {
@@ -34,13 +37,35 @@ export default {
         this.handsontableInstance.search(event.target.value);
       });
     const { updateSettings } = this.handsontableInstance;
-    this.handsontableInstance.loadData(mockTableData(this.colNums));
+
+    console.log("mockTableData(this.colNums)", mockTableData(this.colNums));
+    this.handsontableInstance.loadData([]);
     updateSettings({
       afterGetColHeader: this.afterGetColHeader,
       columns: this.createColumns(),
     });
   },
   methods: {
+    fileChange(event) {
+      const files = event.target.files;
+
+      if (files.length) {
+        excelFilerReader(files[0], (workbook) => {
+          const sheetNames = workbook.SheetNames;
+
+          const worksheet = workbook.Sheets[sheetNames[0]];
+          const merges = worksheet["!merges"];
+
+          let csv = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+          console.log("csv", csv, merges);
+          this.handsontableInstance.mergeCells(
+            xlsxMergeConfigTomergedCells(merges)
+          );
+          this.handsontableInstance.loadData(csv);
+        });
+        // 读取本地excel文件
+      }
+    },
     getMergeCells() {
       const cells = this.handsontableInstance.getAllMergedCells();
 
