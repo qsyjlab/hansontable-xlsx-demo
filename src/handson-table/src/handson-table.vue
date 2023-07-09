@@ -40,9 +40,11 @@ export default {
 
     console.log("mockTableData(this.colNums)", mockTableData(this.colNums));
     this.handsontableInstance.loadData([]);
-    updateSettings({
-      afterGetColHeader: this.afterGetColHeader,
-      columns: this.createColumns(),
+    this.$nextTick(() => {
+      updateSettings({
+        afterGetColHeader: this.afterGetColHeader,
+        columns: this.createColumns(),
+      });
     });
   },
   methods: {
@@ -58,10 +60,10 @@ export default {
 
           let csv = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
           console.log("csv", csv, merges);
+          this.handsontableInstance.loadData(csv);
           this.handsontableInstance.mergeCells(
             xlsxMergeConfigTomergedCells(merges)
           );
-          this.handsontableInstance.loadData(csv);
         });
         // 读取本地excel文件
       }

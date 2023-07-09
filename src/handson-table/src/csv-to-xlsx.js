@@ -53,9 +53,9 @@ export function xlsxMergeConfigTomergedCells(xlsxMergeConfig = []) {
     const rowspan = endRow - startRow + 1;
     const colspan = endCol - startCol + 1;
     const mergeObj = {
-      endRow: endRow - 1,
+      endRow: endRow,
       endCol,
-      row: startRow - 1,
+      row: startRow,
       col: startCol,
       rowspan,
       colspan,
