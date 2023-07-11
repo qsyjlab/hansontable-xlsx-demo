@@ -17,16 +17,20 @@
 <script>
 import CustomHeader from "./custom-header.vue";
 
-import { createHandsontable } from "./handson-table";
-import { mountComponent, mockTableData } from "./utils";
-import { excelFilerReader, xlsxMergeConfigTomergedCells } from "./csv-to-xlsx";
-import * as XLSX from "xlsx";
+import {
+  createHandsontable,
+  xlsxMergeConfigToMergedCells,
+} from "./handson-table";
+import { mountComponent } from "./utils";
+import { xlsxFileReader, useXlsx } from "./xlsx";
 
 export default {
   data() {
     return {
       colNums: 20,
       handsontableInstance: null,
+      xlsxInstance: null,
+      sheetNames: [],
     };
   },
   mounted() {
@@ -38,7 +42,6 @@ export default {
       });
     const { updateSettings } = this.handsontableInstance;
 
-    console.log("mockTableData(this.colNums)", mockTableData(this.colNums));
     this.handsontableInstance.loadData([]);
     this.$nextTick(() => {
       updateSettings({
@@ -52,22 +55,30 @@ export default {
       const files = event.target.files;
 
       if (files.length) {
-        excelFilerReader(files[0], (workbook) => {
-          const sheetNames = workbook.SheetNames;
+        xlsxFileReader(files[0], (workbook) => {
+          const instance = useXlsx();
+          instance.setWorkbook(workbook);
 
-          const worksheet = workbook.Sheets[sheetNames[0]];
-          const merges = worksheet["!merges"];
+          this.sheetNames = instance.getSheetNames();
+          this.xlsxInstance = instance;
 
-          let csv = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-          console.log("csv", csv, merges);
-          this.handsontableInstance.loadData(csv);
-          this.handsontableInstance.mergeCells(
-            xlsxMergeConfigTomergedCells(merges)
-          );
+          this.activeSheetChangeHandler(this.sheetNames[0]);
         });
         // 读取本地excel文件
       }
     },
+
+    activeSheetChangeHandler(sheetName) {
+      this.xlsxInstance.toggleSheetName(sheetName);
+      const csv = this.xlsxInstance.sheetToJson();
+      const merges = this.xlsxInstance.getMerges();
+
+      this.handsontableInstance.loadData(csv);
+      this.handsontableInstance.mergeCells(
+        xlsxMergeConfigToMergedCells(merges)
+      );
+    },
+
     getMergeCells() {
       const cells = this.handsontableInstance.getAllMergedCells();
 

@@ -8,7 +8,7 @@
 
 <script>
 import { ExcelTable } from "@/excel-table";
-import { HandsonExcelTable } from "@/handson-table";
+import { HandsonExcelTable } from "@/handson-table/src/handson-table.vue";
 
 export default {
   components: {

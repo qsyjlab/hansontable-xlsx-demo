@@ -11,8 +11,8 @@ import {
   DEFUALT_DOWNLOAD_FILE_SETTING,
   EXPORT_METHOD_NAME,
 } from "./constant";
-import { csvToXlsx, mergedCellsToXlsxMergeConfig } from "./csv-to-xlsx";
 import { downloadFile } from "./utils";
+import { resolveCsvToXlsx } from "./xlsx";
 
 registerAllModules();
 registerLanguageDictionary(zhCN);
@@ -121,16 +121,16 @@ export function createHandsontable($el, settings = {}) {
     return _baseExport(EXPORT_METHOD_NAME.TO_STRING, setting);
   }
 
-  function downloadXlsxFile() {
+  function downloadXlsxFile(fileName, ext = ".xlsx") {
     const csvData = instance.getData();
     const mergedCells = getAllMergedCells();
 
-    const blob = csvToXlsx(csvData, (worksheet) => {
+    const blob = resolveCsvToXlsx(csvData, (worksheet) => {
       const mergedConfigs = mergedCellsToXlsxMergeConfig(mergedCells);
       worksheet["!merges"] = mergedConfigs;
     });
 
-    downloadFile("merged.xlsx", window.URL.createObjectURL(blob));
+    downloadFile(`${fileName}${ext}`, window.URL.createObjectURL(blob));
   }
 
   function getAllMergedCells() {
@@ -140,11 +140,7 @@ export function createHandsontable($el, settings = {}) {
   }
 
   function mergeCells(mergeConfig) {
-    // console.log(
-    //   instance.getPlugin(HANDESON_PLUGIN_NAME.MERGE_CELLS).mergeCells
-    // );
     mergeConfig.forEach((config) => {
-      console.log("config", config);
       instance
         .getPlugin(HANDESON_PLUGIN_NAME.MERGE_CELLS)
         .merge(config.row, config.col, config.endRow, config.endCol);
@@ -165,6 +161,49 @@ export function createHandsontable($el, settings = {}) {
     mergeCells,
     getSettings: () => instance.getSettings(),
   };
+}
+
+// handsontable mergedCells => xlsx mergeConfig
+export function mergedCellsToXlsxMergeConfig(mergedCells = []) {
+  if (!mergedCells.length) return [];
+  const xlsxMergeConfig = [];
+
+  for (let i = 0; i < mergedCells.length; i++) {
+    const { row, col, rowspan, colspan } = mergedCells[i];
+    const mergeObj = {
+      s: { r: row, c: col },
+      e: { r: row + rowspan - 1, c: col + colspan - 1 },
+    };
+    xlsxMergeConfig.push(mergeObj);
+  }
+
+  return xlsxMergeConfig;
+}
+
+// xlsx mergeConfig => handsontable mergedCells
+export function xlsxMergeConfigToMergedCells(xlsxMergeConfig = []) {
+  if (!xlsxMergeConfig.length) return [];
+  const mergeConfig = [];
+
+  for (const xlsxMerge of xlsxMergeConfig) {
+    const { s, e } = xlsxMerge;
+    const startRow = s.r;
+    const startCol = s.c;
+    const endRow = e.r;
+    const endCol = e.c;
+    const rowspan = endRow - startRow + 1;
+    const colspan = endCol - startCol + 1;
+    const mergeObj = {
+      endRow: endRow,
+      endCol,
+      row: startRow,
+      col: startCol,
+      rowspan,
+      colspan,
+    };
+    mergeConfig.push(mergeObj);
+  }
+  return mergeConfig;
 }
 
 export default createHandsontable;
