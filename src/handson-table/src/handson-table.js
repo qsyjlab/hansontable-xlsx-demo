@@ -121,14 +121,20 @@ export function createHandsontable($el, settings = {}) {
     return _baseExport(EXPORT_METHOD_NAME.TO_STRING, setting);
   }
 
-  function downloadXlsxFile(fileName, ext = ".xlsx") {
+  function downloadXlsxFile(fileName = new Date().getTime(), ext = ".xlsx") {
     const csvData = instance.getData();
     const mergedCells = getAllMergedCells();
 
-    const blob = resolveCsvToXlsx(csvData, (worksheet) => {
-      const mergedConfigs = mergedCellsToXlsxMergeConfig(mergedCells);
-      worksheet["!merges"] = mergedConfigs;
-    });
+    const blob = resolveCsvToXlsx(
+      {
+        sheetName: "sheet1",
+        data: csvData,
+      },
+      (worksheet) => {
+        const mergedConfigs = mergedCellsToXlsxMergeConfig(mergedCells);
+        worksheet["!merges"] = mergedConfigs;
+      }
+    );
 
     downloadFile(`${fileName}${ext}`, window.URL.createObjectURL(blob));
   }

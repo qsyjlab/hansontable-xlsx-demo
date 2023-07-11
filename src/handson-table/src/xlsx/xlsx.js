@@ -11,8 +11,6 @@ export function useXlsx() {
     sheetNames = wb.SheetNames;
     workbook = wb;
 
-    console.log("sheetNames", sheetNames);
-
     if (sheetNames.length) {
       currentSheetName = sheetNames[0];
     }
@@ -63,7 +61,7 @@ export function useXlsx() {
 /**
  * data[] { sheetName:"", data: [[], []] }
  *
- *  csvToXlsx(csvData, (worksheet) => {
+ *  resolveCsvToXlsx(csvData, (worksheet) => {
  *  const mergedConfigs = []
  *   worksheet["!merges"] = mergedConfigs;
  * }
